@@ -34,88 +34,100 @@ class GenerateTask():
 
     def run(self, years: list):
         for year in years:
-            self.b2v4apikey = None
-            while not self.b2v4apikey:
-                try:
-                    proxy = random.choice(self.list_proxies)
-                    self.proxies = {
-                        'http': proxy,
-                        'https': proxy
-                    }
-                    self.b2v4apikey = self.get_api_key()
-                except Exception as ex:
-                    print(ex)
-            result = {}
-            result['year'] = year
-            result['status'] = 1
-            data = {
-                "EquipmentClass":"Passenger Cars & Light Trucks",
-                "EquipmentYear":str(year),
-                "q":"",
-                "CompressedSearch":False
-                }
-            resp_makes = self.get_response(data)
-            makes = resp_makes.get('result',{}).get('columns',{}).get('EquipmentMake',{}).get('results')
-            if not makes:
-                result['status'] = 2
-                result['make'] = None
-                result['model'] = None
-                result['engine'] = None
-                result['response'] = json.dumps(resp_makes)
-                self.insert_datas(result)
+            try:
+                self.b2v4apikey = None
+                while not self.b2v4apikey:
+                    try:
+                        proxy = random.choice(self.list_proxies)
+                        self.proxies = {
+                            'http': proxy,
+                            'https': proxy
+                        }
+                        self.b2v4apikey = self.get_api_key()
+                    except Exception as ex:
+                        print(ex)
+                result = {}
+                result['year'] = year
                 result['status'] = 1
-                continue
-            for make in makes:
-                data.update({"EquipmentMake":make['key']})
-                result['make'] = make['text']
-                resp_models = self.get_response(data)
-                models = resp_models.get('result',{}).get('columns',{}).get('EquipmentModel',{}).get('results')
-                if not models:
-                    models = resp_makes.get('result',{}).get('columns',{}).get('EquipmentModel',{}).get('results')
-                    if not models:
-                        result['status'] = 2
-                        result['model'] = None
-                        result['engine'] = None
-                        result['response'] = json.dumps(resp_models)
-                        self.insert_datas(result)
-                        result['status'] = 1
-                        continue
-                for model in models:
-                    data.update({"EquipmentModel":model['key']})
-                    result['model'] = model['text']
-                    resp_engines = self.get_response(data)
-                    engines = resp_engines.get('result',{}).get('columns',{}).get('EquipmentEngine',{}).get('results')
-                    if not engines:
-                        engines = resp_models.get('result',{}).get('columns',{}).get('EquipmentEngine',{}).get('results')
-                        if not engines:
-                            engines = resp_makes.get('result',{}).get('columns',{}).get('EquipmentEngine',{}).get('results')
-                            if not engines:
+                data = {
+                    "EquipmentClass":"Passenger Cars & Light Trucks",
+                    "EquipmentYear":str(year),
+                    "q":"",
+                    "CompressedSearch":False
+                    }
+                resp_makes = self.get_response(data)
+                makes = resp_makes.get('result',{}).get('columns',{}).get('EquipmentMake',{}).get('results')
+                if not makes:
+                    result['status'] = 2
+                    result['make'] = None
+                    result['model'] = None
+                    result['engine'] = None
+                    result['response'] = json.dumps(resp_makes)
+                    self.insert_datas(result)
+                    result['status'] = 1
+                    continue
+                for make in makes:
+                    try:
+                        data.update({"EquipmentMake":make['key']})
+                        result['make'] = make['text']
+                        resp_models = self.get_response(data)
+                        models = resp_models.get('result',{}).get('columns',{}).get('EquipmentModel',{}).get('results')
+                        if not models:
+                            models = resp_makes.get('result',{}).get('columns',{}).get('EquipmentModel',{}).get('results')
+                            if not models:
                                 result['status'] = 2
+                                result['model'] = None
                                 result['engine'] = None
-                                result['response'] = json.dumps(resp_engines)
+                                result['response'] = json.dumps(resp_models)
                                 self.insert_datas(result)
                                 result['status'] = 1
                                 continue
-                    for engine in engines:
-                        data.update({"EquipmentEngine":engine['key']})
-                        result['engine'] = engine['text']
+                        for model in models:
+                            try:
+                                data.update({"EquipmentModel":model['key']})
+                                result['model'] = model['text']
+                                resp_engines = self.get_response(data)
+                                engines = resp_engines.get('result',{}).get('columns',{}).get('EquipmentEngine',{}).get('results')
+                                if not engines:
+                                    engines = resp_models.get('result',{}).get('columns',{}).get('EquipmentEngine',{}).get('results')
+                                    if not engines:
+                                        engines = resp_makes.get('result',{}).get('columns',{}).get('EquipmentEngine',{}).get('results')
+                                        if not engines:
+                                            result['status'] = 2
+                                            result['engine'] = None
+                                            result['response'] = json.dumps(resp_engines)
+                                            self.insert_datas(result)
+                                            result['status'] = 1
+                                            continue
+                                for engine in engines:
+                                    try:
+                                        data.update({"EquipmentEngine":engine['key']})
+                                        result['engine'] = engine['text']
 
-                        res_data = {
-                            "EquipmentClass":data['EquipmentClass'],
-                            "EquipmentYear":data['EquipmentYear'],
-                            "EquipmentMake":data['EquipmentMake'],
-                            "EquipmentModel":data['EquipmentModel'],
-                            "EquipmentEngine":data['EquipmentEngine'],
-                            "source":"result",
-                            "search_type":None,
-                            "page":0
-                        }
-                        resp_data = self.get_response(res_data)
-                        try:
-                            result['response'] = json.dumps(resp_data)
-                        except:
-                            result['response'] = None
-                        self.insert_datas(result)   
+                                        res_data = {
+                                            "EquipmentClass":data['EquipmentClass'],
+                                            "EquipmentYear":data['EquipmentYear'],
+                                            "EquipmentMake":data['EquipmentMake'],
+                                            "EquipmentModel":data['EquipmentModel'],
+                                            "EquipmentEngine":data['EquipmentEngine'],
+                                            "source":"result",
+                                            "search_type":None,
+                                            "page":0
+                                        }
+                                        resp_data = self.get_response(res_data)
+                                        try:
+                                            result['response'] = json.dumps(resp_data)
+                                        except:
+                                            result['response'] = None
+                                        self.insert_datas(result)  
+                                    except Exception as ex:
+                                        print(ex) 
+                            except Exception as ex:
+                                print(ex)
+                    except Exception as ex:
+                        print(ex)
+            except Exception as ex:
+                print(ex)
 
     def get_api_key(self):
         headers = {
