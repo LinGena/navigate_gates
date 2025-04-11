@@ -7,7 +7,7 @@ environs==14.1.1
 idna==3.10
 lxml==5.3.2
 marshmallow==3.26.1
-mysql-connector==2.2.9
+mysql-connector-python==8.0.33
 packaging==24.2
 python-dotenv==1.1.0
 python-slugify==8.0.4
