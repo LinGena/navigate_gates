@@ -207,7 +207,7 @@ class GenerateTask():
             response.raise_for_status()
             return response.json()
         except Exception as ex:
-            # print(ex)
+            print(ex)
             pass
         if count_try > 20:
             print('no data')
