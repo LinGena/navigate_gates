@@ -38,11 +38,6 @@ class GenerateTask():
                 self.b2v4apikey = None
                 while not self.b2v4apikey:
                     try:
-                        proxy = random.choice(self.list_proxies)
-                        self.proxies = {
-                            'http': proxy,
-                            'https': proxy
-                        }
                         self.b2v4apikey = self.get_api_key()
                     except Exception as ex:
                         print(ex)
@@ -57,48 +52,48 @@ class GenerateTask():
                     }
                 resp_makes = self.get_response(data)
                 makes = resp_makes.get('result',{}).get('columns',{}).get('EquipmentMake',{}).get('results')
-                if not makes:
-                    result['status'] = 2
-                    result['make'] = None
-                    result['model'] = None
-                    result['engine'] = None
-                    result['response'] = json.dumps(resp_makes)
-                    self.insert_datas(result)
-                    result['status'] = 1
-                    continue
+                # if not makes:
+                #     result['status'] = 2
+                #     result['make'] = None
+                #     result['model'] = None
+                #     result['engine'] = None
+                #     result['response'] = json.dumps(resp_makes)
+                #     self.insert_datas(result)
+                #     result['status'] = 1
+                #     continue
                 for make in makes:
                     try:
                         data.update({"EquipmentMake":make['key']})
                         result['make'] = make['text']
                         resp_models = self.get_response(data)
                         models = resp_models.get('result',{}).get('columns',{}).get('EquipmentModel',{}).get('results')
-                        if not models:
-                            models = resp_makes.get('result',{}).get('columns',{}).get('EquipmentModel',{}).get('results')
-                            if not models:
-                                result['status'] = 2
-                                result['model'] = None
-                                result['engine'] = None
-                                result['response'] = json.dumps(resp_models)
-                                self.insert_datas(result)
-                                result['status'] = 1
-                                continue
+                        # if not models:
+                        #     models = resp_makes.get('result',{}).get('columns',{}).get('EquipmentModel',{}).get('results')
+                        #     if not models:
+                        #         result['status'] = 2
+                        #         result['model'] = None
+                        #         result['engine'] = None
+                        #         result['response'] = json.dumps(resp_models)
+                        #         self.insert_datas(result)
+                        #         result['status'] = 1
+                        #         continue
                         for model in models:
                             try:
                                 data.update({"EquipmentModel":model['key']})
                                 result['model'] = model['text']
                                 resp_engines = self.get_response(data)
                                 engines = resp_engines.get('result',{}).get('columns',{}).get('EquipmentEngine',{}).get('results')
-                                if not engines:
-                                    engines = resp_models.get('result',{}).get('columns',{}).get('EquipmentEngine',{}).get('results')
-                                    if not engines:
-                                        engines = resp_makes.get('result',{}).get('columns',{}).get('EquipmentEngine',{}).get('results')
-                                        if not engines:
-                                            result['status'] = 2
-                                            result['engine'] = None
-                                            result['response'] = json.dumps(resp_engines)
-                                            self.insert_datas(result)
-                                            result['status'] = 1
-                                            continue
+                                # if not engines:
+                                #     engines = resp_models.get('result',{}).get('columns',{}).get('EquipmentEngine',{}).get('results')
+                                #     if not engines:
+                                #         engines = resp_makes.get('result',{}).get('columns',{}).get('EquipmentEngine',{}).get('results')
+                                #         if not engines:
+                                #             result['status'] = 2
+                                #             result['engine'] = None
+                                #             result['response'] = json.dumps(resp_engines)
+                                #             self.insert_datas(result)
+                                #             result['status'] = 1
+                                #             continue
                                 for engine in engines:
                                     try:
                                         data.update({"EquipmentEngine":engine['key']})
@@ -149,10 +144,15 @@ class GenerateTask():
         params = {
             'd': str(int(time.time() * 1000)),
         }
+        proxy = random.choice(self.list_proxies)
+        proxies = {
+            'http': proxy,
+            'https': proxy
+        }
         response = requests.get(
             'https://navigates.gates.com/us/assets/config/appconfig.production.json',
             params=params,
-            proxies=self.proxies,
+            proxies=proxies,
             headers=headers,
         )
         data = response.json()
@@ -193,16 +193,23 @@ class GenerateTask():
             'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36',
             'x-requested-with': 'XMLHttpRequest',
         }
+        proxy = random.choice(self.list_proxies)
+        proxies = {
+            'http': proxy,
+            'https': proxy
+        }
         try:
             response = requests.post('https://api-v3-us.partsb2.com/api/Gates-US/Search/AutoSearchUS', 
                                     headers=headers, 
                                     data=json.dumps(data),
-                                    proxies=self.proxies)
+                                    proxies=proxies, 
+                                    timeout=20)
             response.raise_for_status()
             return response.json()
         except Exception as ex:
-            print(ex)
-        if count_try > 10:
+            # print(ex)
+            pass
+        if count_try > 20:
             print('no data')
             return None
         return self.get_response(data, count_try+1)
