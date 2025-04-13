@@ -63,48 +63,29 @@ class GenerateTask():
                 #     continue
                 for make in makes:
                     try:
+                        if "EquipmentModel" in data:
+                            del data["EquipmentModel"]
                         data.update({"EquipmentMake":make['key']})
                         result['make'] = make['text']
                         resp_models = self.get_response(data)
                         models = resp_models.get('result',{}).get('columns',{}).get('EquipmentModel',{}).get('results')
-                        # if not models:
-                        #     models = resp_makes.get('result',{}).get('columns',{}).get('EquipmentModel',{}).get('results')
-                        #     if not models:
-                        #         result['status'] = 2
-                        #         result['model'] = None
-                        #         result['engine'] = None
-                        #         result['response'] = json.dumps(resp_models)
-                        #         self.insert_datas(result)
-                        #         result['status'] = 1
-                        #         continue
+
                         for model in models:
                             try:
                                 data.update({"EquipmentModel":model['key']})
                                 result['model'] = model['text']
                                 resp_engines = self.get_response(data)
                                 engines = resp_engines.get('result',{}).get('columns',{}).get('EquipmentEngine',{}).get('results')
-                                # if not engines:
-                                #     engines = resp_models.get('result',{}).get('columns',{}).get('EquipmentEngine',{}).get('results')
-                                #     if not engines:
-                                #         engines = resp_makes.get('result',{}).get('columns',{}).get('EquipmentEngine',{}).get('results')
-                                #         if not engines:
-                                #             result['status'] = 2
-                                #             result['engine'] = None
-                                #             result['response'] = json.dumps(resp_engines)
-                                #             self.insert_datas(result)
-                                #             result['status'] = 1
-                                #             continue
+                                
                                 for engine in engines:
                                     try:
-                                        data.update({"EquipmentEngine":engine['key']})
                                         result['engine'] = engine['text']
-
                                         res_data = {
                                             "EquipmentClass":data['EquipmentClass'],
                                             "EquipmentYear":data['EquipmentYear'],
                                             "EquipmentMake":data['EquipmentMake'],
                                             "EquipmentModel":data['EquipmentModel'],
-                                            "EquipmentEngine":data['EquipmentEngine'],
+                                            "EquipmentEngine":engine['key'],
                                             "source":"result",
                                             "search_type":None,
                                             "page":0
