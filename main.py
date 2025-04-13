@@ -202,8 +202,7 @@ class GenerateTask():
             response = requests.post('https://api-v3-us.partsb2.com/api/Gates-US/Search/AutoSearchUS', 
                                     headers=headers, 
                                     data=json.dumps(data),
-                                    proxies=proxies, 
-                                    timeout=20)
+                                    proxies=proxies)
             response.raise_for_status()
             return response.json()
         except Exception as ex:
