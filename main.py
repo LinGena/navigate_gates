@@ -114,9 +114,12 @@ class GеtProducts():
 
    
     def insert_datas(self, res: dict, url: str):
-        sql = f"INSERT INTO {self.model.table_datas} (datas, URL) VALUES (%s,%s)"
-        print(res)
-        self.model.insert(sql, (json.dumps(res), url))
+        try:
+            sql = f"INSERT INTO {self.model.table_datas} (datas, URL) VALUES (%s,%s)"
+            print(res)
+            self.model.insert(sql, (json.dumps(res), url))
+        except Exception as ex:
+            print(ex)
         
 
     def get_link_response(self, link: str, count_try: int = 0) -> str:
