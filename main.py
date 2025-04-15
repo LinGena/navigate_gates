@@ -52,15 +52,7 @@ class GenerateTask():
                     }
                 resp_makes = self.get_response(data)
                 makes = resp_makes.get('result',{}).get('columns',{}).get('EquipmentMake',{}).get('results')
-                # if not makes:
-                #     result['status'] = 2
-                #     result['make'] = None
-                #     result['model'] = None
-                #     result['engine'] = None
-                #     result['response'] = json.dumps(resp_makes)
-                #     self.insert_datas(result)
-                #     result['status'] = 1
-                #     continue
+             
                 for make in makes:
                     try:
                         if "EquipmentModel" in data:
@@ -199,7 +191,8 @@ class GenerateTask():
 
 if __name__ == "__main__":
     IsDbCreated().check()
-    GetTreadPagesContent().run()
+    print('OK')
+    # GetTreadPagesContent().run()
 
 
 
