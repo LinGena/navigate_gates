@@ -30,7 +30,7 @@ class TreadGеtProducts():
     def run(self, threads_count: int = 10) -> None:
         self.proxies = get_proxies()
         model = Db()
-        sql = f'SELECT * FROM {model.table_tasks} WHERE status=1 LIMIT '
+        sql = f'SELECT * FROM {model.table_tasks} WHERE status=1'
         rows = model.select(sql)
         countThread = round(len(rows) / int(threads_count)) + 1
         threads = [Thread(target=self.run_tread, args=(chunk,)) for chunk in func_chunk_array(rows, countThread)]
