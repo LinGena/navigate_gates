@@ -60,53 +60,56 @@ class GеtProducts():
 
     def run(self, resp_data_list):
         for resp_data in resp_data_list:
-            id = resp_data[0]
-            result = {}
-            result['year'] = resp_data[1]
-            result['make'] = resp_data[2]
-            result['model'] = resp_data[3]
-            result['engine'] = resp_data[4]
-            datas = json.loads(resp_data[5])
+            try:
+                id = resp_data[0]
+                result = {}
+                result['year'] = resp_data[1]
+                result['make'] = resp_data[2]
+                result['model'] = resp_data[3]
+                result['engine'] = resp_data[4]
+                datas = json.loads(resp_data[5])
 
-            datas = datas.get('result',{}).get('columns',{}).get('PartNumber',{}).get('results')
-            error = 1
-            for data in datas:
-                try:
-                    cat = data.get('props',{}).get('ProductCategory')
-                    if cat and cat == 'Belt Drive System':
-                        part = data.get('props',{}).get('ProductNr')
-                        if not part:
-                            continue
-                        result['Part_number'] = part
-                        result['Application'] = data.get('props',{}).get('ApplicationDescription')
-                        result['Product_Type'] = data.get('props',{}).get('ProductType')
-                        url = 'https://navigates.gates.com/us' + data.get('href')
-                        params = {
-                            'ProductNr': part,
-                            'BrandName': 'gates',
-                            'SearchType': 'vehicle',
-                            'Reset': '1',
-                        }
-                        response = self.get_response(params)
-                        resultsSpec = response.get('result',{}).get('prod',{}).get('Specs')
-                        if not resultsSpec:
-                            print('No resultsSpec. ', params)
-                            error += 1
-                            self.update_status(id, 4)
-                            continue
-                        specs = {}
-                        for spec in resultsSpec:
-                            specs[spec['Criteria']]=spec['Value']
+                datas = datas.get('result',{}).get('columns',{}).get('PartNumber',{}).get('results')
+                error = 1
+                for data in datas:
+                    try:
+                        cat = data.get('props',{}).get('ProductCategory')
+                        if cat and cat == 'Belt Drive System':
+                            part = data.get('props',{}).get('ProductNr')
+                            if not part:
+                                continue
+                            result['Part_number'] = part
+                            result['Application'] = data.get('props',{}).get('ApplicationDescription')
+                            result['Product_Type'] = data.get('props',{}).get('ProductType')
+                            url = 'https://navigates.gates.com/us' + data.get('href')
+                            params = {
+                                'ProductNr': part,
+                                'BrandName': 'gates',
+                                'SearchType': 'vehicle',
+                                'Reset': '1',
+                            }
+                            response = self.get_response(params)
+                            resultsSpec = response.get('result',{}).get('prod',{}).get('Specs')
+                            if not resultsSpec:
+                                print('No resultsSpec. ', params)
+                                error += 1
+                                self.update_status(id, 4)
+                                continue
+                            specs = {}
+                            for spec in resultsSpec:
+                                specs[spec['Criteria']]=spec['Value']
 
-                        result.update({'Specs':specs})
-                        self.insert_datas(result, url)
-                except Exception as ex:
-                    print('ERROR: ',ex)
-                    error += 1
-                    self.update_status(id, 3)
-                    continue
-            if error == 1:
-                self.update_status(id, 2)
+                            result.update({'Specs':specs})
+                            self.insert_datas(result, url)
+                    except Exception as ex:
+                        print('ERROR: ',ex)
+                        error += 1
+                        self.update_status(id, 3)
+                        continue
+                if error == 1:
+                    self.update_status(id, 2)
+            except:
+                pass
 
     def update_status(self, id: int, status: int):
         sql = f"UPDATE {self.model.table_tasks} SET status=%s WHERE id=%s"
