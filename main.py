@@ -28,26 +28,26 @@ def get_rows_in_batches(model, batch_size=1000):
 
 class TreadGеtProducts():
     def run(self, threads_count: int = 10) -> None:
-        # self.proxies = get_proxies()
-        # model = Db()
-        # sql = f'SELECT * FROM {model.table_tasks} WHERE status=1 LIMIT '
-        # rows = model.select(sql)
-        # countThread = round(len(rows) / int(threads_count)) + 1
-        # threads = [Thread(target=self.run_tread, args=(chunk,)) for chunk in func_chunk_array(rows, countThread)]
-        # for thread in threads:
-        #     thread.start()
-
         self.proxies = get_proxies()
         model = Db()
-        batch_size = 1000
-        for batch in get_rows_in_batches(model, batch_size):
-            countThread = round(len(batch) / int(threads_count)) + 1
-            threads = [Thread(target=self.run_tread, args=(chunk,)) for chunk in func_chunk_array(batch, countThread)]
-            for thread in threads:
-                thread.start()
-                time.sleep(0.1)  # невелика затримка, щоб не навантажити CPU
-            for thread in threads:
-                thread.join()
+        sql = f'SELECT * FROM {model.table_tasks} WHERE status=1 LIMIT '
+        rows = model.select(sql)
+        countThread = round(len(rows) / int(threads_count)) + 1
+        threads = [Thread(target=self.run_tread, args=(chunk,)) for chunk in func_chunk_array(rows, countThread)]
+        for thread in threads:
+            thread.start()
+
+        # self.proxies = get_proxies()
+        # model = Db()
+        # batch_size = 1000
+        # for batch in get_rows_in_batches(model, batch_size):
+        #     countThread = round(len(batch) / int(threads_count)) + 1
+        #     threads = [Thread(target=self.run_tread, args=(chunk,)) for chunk in func_chunk_array(batch, countThread)]
+        #     for thread in threads:
+        #         thread.start()
+        #         time.sleep(0.1)  # невелика затримка, щоб не навантажити CPU
+        #     for thread in threads:
+        #         thread.join()
 
     def run_tread(self, rows: list) -> None:
         GеtProducts(self.proxies).run(rows)
