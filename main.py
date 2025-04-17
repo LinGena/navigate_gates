@@ -32,10 +32,11 @@ class TreadGеtProducts():
         model = Db()
         sql = f'SELECT * FROM {model.table_tasks} WHERE status=1'
         rows = model.select(sql)
-        countThread = round(len(rows) / int(threads_count)) + 1
-        threads = [Thread(target=self.run_tread, args=(chunk,)) for chunk in func_chunk_array(rows, countThread)]
-        for thread in threads:
-            thread.start()
+        self.run_tread(rows)
+        # countThread = round(len(rows) / int(threads_count)) + 1
+        # threads = [Thread(target=self.run_tread, args=(chunk,)) for chunk in func_chunk_array(rows, countThread)]
+        # for thread in threads:
+        #     thread.start()
 
         # self.proxies = get_proxies()
         # model = Db()
@@ -108,8 +109,8 @@ class GеtProducts():
                         continue
                 if error == 1:
                     self.update_status(id, 2)
-            except:
-                pass
+            except Exception as ex:
+                print(ex)
 
     def update_status(self, id: int, status: int):
         sql = f"UPDATE {self.model.table_tasks} SET status=%s WHERE id=%s"
